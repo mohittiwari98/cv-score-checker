@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Resume Analyzer - Light Animated</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.7.0/docx.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  /* Light pastel animated gradient background */
+  @keyframes pastelShift {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(270deg, #A8E6CF, #FFD3B6, #FFAAA5, #FF8B94);
+    background-size: 800% 800%;
+    animation: pastelShift 30s ease infinite;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    padding: 2rem 2.5rem;
+    color: #333;
+    transition: box-shadow 0.3s ease;
+  }
+  .card:hover {
+    box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    font-size: 2.5rem;
+    color: #ff6b6b;
+    text-shadow: 1px 1px 3px #ffaaa5aa;
+  }
+
+  textarea {
+    width: 100%;
+    height: 200px;
+    border-radius: 15px;
+    border: 2px solid #ffaaa5;
+    padding: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    resize: vertical;
+    background: #fff;
+    color: #333;
+    box-shadow: inset 0 0 8px #ffaaa5aa;
+    transition: border-color 0.3s ease;
+  }
+  textarea:focus {
+    border-color: #ff6b6b;
+    outline: none;
+    box-shadow: inset 0 0 12px #ff6b6baa;
+  }
+
+  select, button, input[type="file"] {
+    margin-top: 1rem;
+    border-radius: 12px;
+    border: 2px solid #ffaaa5;
+    padding: 0.85rem 1.4rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    color: #ff6b6b;
+    transition: all 0.3s ease;
+  }
+
+  select:hover, button:hover, input[type="file"]:hover {
+    background: #ff6b6b;
+    color: white;
+    border-color: #ff6b6b;
+  }
+
+  button {
+    margin-right: 1rem;
+  }
+
+  input[type="file"] {
+    padding: 0.6rem 1rem;
+  }
+
+  #output {
+    margin-top: 1.5rem;
+    background: #fff6f6;
+    padding: 1.5rem;
+    border-radius: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    color: #333;
+    white-space: pre-wrap;
+    box-shadow: 0 4px 12px #ffaaa5aa;
+  }
+
+  #rating {
+    margin-top: 1.2rem;
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  /* Bold colored scores */
+  .score-cgpa { color: #ff6b6b; font-weight: 700; }
+  .score-exp { color: #f7b733; font-weight: 700; }
+  .score-projects { color: #4caf50; font-weight: 700; }
+  .score-skills { color: #00bcd4; font-weight: 700; }
+  .final-score { color: #e91e63; font-weight: 900; font-size: 1.8rem; }
+
+  .highlight {
+    background: #ff6b6b;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .card {
+      padding: 1.5rem 1.8rem;
+    }
+    textarea {
+      height: 150px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>📄 Resume Analyzer</h1>
+      <input type="file" id="pdfInput" accept="application/pdf" />
+      <textarea id="resumeInput" placeholder="Paste or upload your resume here..."></textarea>
+      <label for="role" style="display:block; margin-top:1rem; font-weight:600; color:#ff6b6b;">Job Role:</label>
+      <select id="role">
+        <option>Software Engineer</option>
+        <option>Data Analyst</option>
+        <option>Product Manager</option>
+        <option>UI/UX Designer</option>
+        <option>Marketing Manager</option>
+        <option>DevOps Engineer</option>
+        <option>web developer</option>
+      </select>
+      <div style="margin-top:1.5rem;">
+        <button onclick="analyzeResume()">Analyze</button>
+        <button onclick="downloadDocx()">Download as .docx</button>
+      </div>
+      <div id="rating"></div>
+      <div id="output"></div>
+    </div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.7.0/docx.min.js"></script>
+<script>
+  document.getElementById("pdfInput").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === "application/pdf") {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const pdf = await pdfjsLib.getDocument({ data: reader.result }).promise;
+        let text = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          text += content.items.map(item => item.str).join(" ") + "\n";
+        }
+        document.getElementById("resumeInput").value = text;
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  });
+
+  function analyzeResume() {
+    const resume = document.getElementById("resumeInput").value.trim();
+    const role = document.getElementById("role").value;
+    const output = document.getElementById("output");
+    const rating = document.getElementById("rating");
+
+    if (!resume) {
+      output.innerHTML = "❗ Please enter or upload a resume.";
+      rating.innerHTML = "";
+      return;
+    }
+
+    const keywords = {
+      "Software Engineer": ["JavaScript", "React", "Node.js", "Git", "Agile", "REST"],
+      "Data Analyst": ["SQL", "Excel", "Python", "Power BI", "Tableau", "Statistics"],
+      "Product Manager": ["Roadmap", "Stakeholders", "MVP", "KPIs", "User Stories"],
+      "UI/UX Designer": ["Figma", "Wireframes", "Prototypes", "User Research", "Accessibility"],
+      "Marketing Manager": ["SEO", "Campaigns", "Google Ads", "Analytics", "Branding"],
+      "DevOps Engineer": ["CI/CD", "Docker", "Kubernetes", "AWS", "Monitoring"],
+      "web developer": ["HTML", "CSS", "JS", "AWS", "Typescript"]
+    };
+
+    let totalScore = 0;
+    let maxTotal = 20;
+    let details = [];
+
+    // CGPA
+    let cgpaScore = 0;
+    let cgpaText = "<span class='score-cgpa'>CGPA not found</span>";
+    const cgpaMatch = resume.match(/\b(CGPA|GPA)[^\d]*(\d\.\d{1,2})/i);
+    if (cgpaMatch) {
+      const cgpaValue = parseFloat(cgpaMatch[2]);
+      cgpaScore = Math.min(5, (cgpaValue / 10) * 5);
+      cgpaText = `<span class='score-cgpa'>CGPA found: ${cgpaValue} — Score: ${cgpaScore.toFixed(1)}/5</span>`;
+    }
+    totalScore += cgpaScore;
+    details.push(cgpaText);
+
+    // Experience
+    let expScore = 0;
+    let expText = "<span class='score-exp'>Experience not found</span>";
+    const expMatch = resume.match(/(\d+)[+\s-]*(years|yrs)/i);
+    if (expMatch) {
+      const years = parseInt(expMatch[1], 10);
+      expScore = Math.min(5, (years / 10) * 5);
+      expText = `<span class='score-exp'>Experience found: ${years} years — Score: ${expScore.toFixed(1)}/5</span>`;
+    }
+    totalScore += expScore;
+    details.push(expText);
+
+    // Projects
+    let projScore = 0;
+    let projText = "<span class='score-projects'>Projects section unclear</span>";
+    const projCount = (resume.match(/\b(project|developed|built|designed)\b/gi) || []).length;
+    projScore = Math.min(5, projCount);
+    projText = `<span class='score-projects'>Projects keywords mentions: ${projCount} — Score: ${projScore}/5</span>`;
+    totalScore += projScore;
+    details.push(projText);
+
+    // Skills
+    let skillScore = 0;
+    let skillText = "<span class='score-skills'>Skills missing for the role</span>";
+    const roleSkills = keywords[role];
+    let skillHits = 0;
+    roleSkills.forEach(skill => {
+      if (resume.toLowerCase().includes(skill.toLowerCase())) skillHits++;
+    });
+    skillScore = Math.min(5, skillHits);
+    skillText = `<span class='score-skills'>Skills matched for role (${role}): ${skillHits} / ${roleSkills.length} — Score: ${skillScore}/5</span>`;
+    totalScore += skillScore;
+    details.push(skillText);
+
+    const finalScore = (totalScore / maxTotal) * 10;
+
+    // Readability check
+    const sentenceCount = resume.split(/[.!?]/).length;
+    const wordCount = resume.split(/\s+/).length;
+    const avgWords = wordCount / (sentenceCount || 1);
+    let readabilityNote = "";
+    if (avgWords > 25) readabilityNote = "💡 Try shortening sentences for better clarity.";
+
+    rating.innerHTML = `<div class="final-score">⭐ Final Resume Score: ${finalScore.toFixed(1)} / 10</div>`;
+
+    const overused = ["hardworking", "team player", "motivated", "responsible"];
+    const highlighted = resume.replace(
+      new RegExp(`\\b(${overused.join("|")})\\b`, "gi"),
+      '<span class="highlight">$1</span>'
+    );
+
+    let feedback = `<strong>✅ Resume Content Preview with Highlights:</strong><br><br>${highlighted}<br><br>`;
+    feedback += `<strong>📊 Score Breakdown:</strong><br>• ${details.join("<br>• ")}<br>`;
+    if (readabilityNote) feedback += `<br><em>${readabilityNote}</em>`;
+
+    output.innerHTML = feedback;
+  }
+
+  function downloadDocx() {
+    const { Document, Packer, Paragraph } = window.docx;
+    const text = document.getElementById("resumeInput").value;
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [new Paragraph(text)]
+      }]
+    });
+
+    Packer.toBlob(doc).then(blob => {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "Improved_Resume.docx";
+      link.click();
+    });
+  }
+</script>
+</body>
+</html>
